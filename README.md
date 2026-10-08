@@ -15,6 +15,8 @@ node github-upload.mjs check                                   # 验 token
 node github-upload.mjs new dsh-xxx [--private]                 # 建仓库
 node github-upload.mjs upload wang1293965662-ai/dsh-xxx ./dsh-xxx [远端前缀] [--only a.md,b/c.js]
 node github-upload.mjs files wang1293965662-ai/dsh-xxx         # 列远端（公开仓库免 token）
+node github-upload.mjs meta <owner/repo> --desc "..." --topics a,b,c   # 填 About/Topics
+node github-upload.mjs release <owner/repo> v1.0.0 [标题]              # 打版本标签
 node github-upload.mjs delete wang1293965662-ai/dsh-xxx path/to/file
 ```
 
