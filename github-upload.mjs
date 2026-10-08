@@ -98,8 +98,14 @@ if (cmd === 'check') {
   const d = flag('--desc'); if (d) body.description = d;
   const tp = flag('--topics'); if (tp) body.topics = tp.split(',').map((x) => x.trim()).filter(Boolean);
   const r = await fetch(API + '/repos/' + repo, { method: 'PATCH', headers: H(t), body: JSON.stringify(body) });
-  if (r.ok) { const j = await r.json(); console.log('OK 已更新 ' + j.full_name + '  topics=' + (j.topics || []).join(',')); }
-  else die('更新失败 HTTP ' + r.status + ' ' + (await r.text()).slice(0, 140));
+  if (!r.ok) die('更新失败 HTTP ' + r.status + ' ' + (await r.text()).slice(0, 140));
+  /* topics 不能用 repo PATCH 设，必须打这个专门端点 */
+  if (body.topics) {
+    const rt = await fetch(API + '/repos/' + repo + '/topics', { method: 'PUT', headers: { ...H(t), Accept: 'application/vnd.github+json' }, body: JSON.stringify({ names: body.topics }) });
+    if (!rt.ok) die('topics 设置失败 HTTP ' + rt.status + ' ' + (await rt.text()).slice(0, 140));
+  }
+  const j = await r.json();
+  console.log('OK ' + j.full_name + '  desc=' + String(j.description || '').slice(0, 24) + '…  topics=' + (body.topics || []).join(','));
 } else if (cmd === 'release') {
   const repo = args[0], tag = args[1], title = args[2] || tag;
   if (!repo || !tag) die('要 owner/repo tag');
