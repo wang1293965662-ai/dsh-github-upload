@@ -37,6 +37,8 @@ if (!cmd || cmd === '--help' || cmd === '-h') {
   node github-upload.mjs files <owner/repo>
   node github-upload.mjs new <repo> [--private]
   node github-upload.mjs upload <owner/repo> <本地目录> [远端前缀] [--only a.md,b/c.js]
+  node github-upload.mjs meta <owner/repo> --desc "..." --topics a,b,c
+  node github-upload.mjs release <owner/repo> <tag> [标题]
   node github-upload.mjs delete <owner/repo> <路径>`);
   process.exit(0);
 }
@@ -89,4 +91,20 @@ if (cmd === 'check') {
   const sha = (await g.json()).sha;
   const r = await fetch(API + '/repos/' + repo + '/contents/' + encodeURI(p), { method: 'DELETE', headers: H(t), body: JSON.stringify({ message: 'delete ' + p, sha }) });
   console.log(r.ok ? '✅ 删了 ' + p : '❌ HTTP ' + r.status);
+} else if (cmd === 'meta') {
+  const repo = args[0]; if (!repo) die('要 owner/repo');
+  const t = token(); if (!t) die('要 token');
+  const body = {};
+  const d = flag('--desc'); if (d) body.description = d;
+  const tp = flag('--topics'); if (tp) body.topics = tp.split(',').map((x) => x.trim()).filter(Boolean);
+  const r = await fetch(API + '/repos/' + repo, { method: 'PATCH', headers: H(t), body: JSON.stringify(body) });
+  if (r.ok) { const j = await r.json(); console.log('OK 已更新 ' + j.full_name + '  topics=' + (j.topics || []).join(',')); }
+  else die('更新失败 HTTP ' + r.status + ' ' + (await r.text()).slice(0, 140));
+} else if (cmd === 'release') {
+  const repo = args[0], tag = args[1], title = args[2] || tag;
+  if (!repo || !tag) die('要 owner/repo tag');
+  const t = token(); if (!t) die('要 token');
+  const r = await fetch(API + '/repos/' + repo + '/releases', { method: 'POST', headers: H(t), body: JSON.stringify({ tag_name: tag, name: title, generate_release_notes: true }) });
+  if (r.status === 201) { const j = await r.json(); console.log('OK 发布 ' + j.tag_name + ' -> ' + j.html_url); }
+  else die('发布失败 HTTP ' + r.status + ' ' + (await r.text()).slice(0, 160));
 } else die('未知命令：' + cmd);
