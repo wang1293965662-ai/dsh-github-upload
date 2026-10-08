@@ -1,0 +1,5 @@
+*.log
+*.tgz
+dns缓存.json
+gh-token.txt
+缓存/
