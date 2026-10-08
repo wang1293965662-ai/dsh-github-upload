@@ -13,6 +13,8 @@ node github-upload.mjs check                                   # 验 token
 node github-upload.mjs new dsh-xxx                             # 建仓库（需 token）
 node github-upload.mjs upload wang1293965662-ai/dsh-xxx ./dsh-xxx
 node github-upload.mjs files wang1293965662-ai/dsh-xxx         # 数一遍（公开仓库免 token）
+node github-upload.mjs meta wang1293965662-ai/dsh-xxx --desc "说明" --topics dsh,dns
+node github-upload.mjs release wang1293965662-ai/dsh-xxx v1.0.0 "标题"
 ```
 
 ## token 从哪来（一次配置，之后全自动）
